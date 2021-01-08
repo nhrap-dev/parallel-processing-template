@@ -15,7 +15,7 @@ class Workers:
     """
     def __init__(self, func, iterables, asyncronous=True):
         t0 = time()
-        if len(sys.argv) >= 2:
+        if len(sys.argv) >= 3:
             cpus = int(sys.argv[2])
         else:
             cpus = os.cpu_count()
@@ -33,7 +33,7 @@ class Workers:
                     workloads.append(workload)
                 executor.map(func, workloads)
         else:
-            with ThreadPoolExecutor() as executor: # sequential - fastest on small datasets
+            with ThreadPoolExecutor() as executor: # sequential - fastest on medium datasets
                 for idx in range(cpus):
                     if idx < cpus - 1:
                         workload = iterables[location:location + workloadInterval]
@@ -42,7 +42,7 @@ class Workers:
                         workload = iterables[location:]
                     workloads.append(workload)
                 executor.map(func, workloads)
-        print('Total elapsed time: ' + str(time() - t0))
+        print('Total processing time: ' + str(time() - t0))
 
 
 def work(iterables):
@@ -57,25 +57,24 @@ def baseline(func, iterables):
     """Runs work without parallel processing or thread pooling to get a baseline execution speed"""
     t0 = time()
     func(iterables)
-    print('Baseline time: ' + str(time() - t0))
+    print('Baseline processing time: ' + str(time() - t0))
 
 
 if __name__=='__main__':
-    sampleDatasetSize = 5000000
+    sampleDatasetSize = 1000000
     iterables = [randint(0, 1000) for x in range(0, sampleDatasetSize)] # example with one argument
     # iterables = [(randint(0, 1000), randint(0, 1000)) for x in range(0, sampleDatasetSize)] # example with two arguments; use Pool.starmap
     if len(sys.argv) > 1 and sys.argv[1] == 'baseline':
         baseline(work, iterables)
     else:
-        if sys.argv[1] == 'sync':
-            Workers(work, iterables, asyncronous=False)
-        elif sys.argv[1] == 'async':
+        if sys.argv[1] == 'parallel':
             Workers(work, iterables, asyncronous=True)
+        elif sys.argv[1] == 'thread':
+            Workers(work, iterables, asyncronous=False)
         else:
             scriptname = os.path.basename(__file__)
-            print("""
-                ERROR: Unable to understand system argument.\n Try one of the following: \n  
-                  python {s} sync <workers:int> \n  
-                  python {s} async <workers:int> \n  
+            print("""ERROR: Unable to understand system argument.\nTry one of the following: \n  
+                  python {s} parallel <workers:int> \n  
+                  python {s} thread <workers:int> \n  
                   python {s} baseline
                 """.format(s=scriptname))
