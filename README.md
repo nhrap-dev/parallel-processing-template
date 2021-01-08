@@ -20,7 +20,23 @@ The script can be executed from a terminal in the following ways:
 
 ## Implementing Your Own Methods
 
-To adapt this template to your own methods, you will need to update the work method with your own method.
+To adapt this template to your own methods, you will need to update the iterables and the work method. See `example.py`
+
+**iterables**
+
+``` python
+if __name__=='__main__':
+    sampleDatasetSize = 1000000
+    iterables = [randint(0, 1000) for x in range(0, sampleDatasetSize)] # <-- change this to whatever you want to process
+```
+
+**work method**
+
+``` python
+def work(iterables):
+    for iterable in iterables:
+        """do something""" # <-- your code here
+```
 
 The Workers class can also be imported and initialized with methods other than work. Following the Workers class docstring, it can use any method that takes one list argument:
 
